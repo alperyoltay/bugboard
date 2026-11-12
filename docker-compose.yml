@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bugboard
+      POSTGRES_PASSWORD: bugboard # local development only
+      POSTGRES_DB: bugboard
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./api/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bugboard"]
+      interval: 3s
+      retries: 10
+
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgres://bugboard:bugboard@db:5432/bugboard
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./web
+    environment:
+      API_URL: http://api:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  db-data:

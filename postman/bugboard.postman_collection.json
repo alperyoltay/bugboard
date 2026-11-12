@@ -1,0 +1,91 @@
+{
+  "info": {
+    "name": "Bugboard API",
+    "description": "Contract tests for the Bugboard REST API. Run with: npx newman run postman/bugboard.postman_collection.json",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "bugId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "pm.test('body is ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+      ] } }]
+    },
+    {
+      "name": "Create bug",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/bugs",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"title\":\"Newman created bug\",\"severity\":\"high\",\"stepsToReproduce\":\"1. Run newman\"}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 201', () => pm.response.to.have.status(201));",
+        "const bug = pm.response.json();",
+        "pm.test('defaults to open', () => pm.expect(bug.status).to.eql('open'));",
+        "pm.collectionVariables.set('bugId', bug.id);"
+      ] } }]
+    },
+    {
+      "name": "Reject invalid bug",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/bugs",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"title\":\"x\",\"severity\":\"urgent\"}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 400', () => pm.response.to.have.status(400));",
+        "pm.test('reports both problems', () => pm.expect(pm.response.json().details).to.have.lengthOf(2));"
+      ] } }]
+    },
+    {
+      "name": "Get bug",
+      "request": { "method": "GET", "url": "{{baseUrl}}/bugs/{{bugId}}" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "pm.test('same title', () => pm.expect(pm.response.json().title).to.eql('Newman created bug'));"
+      ] } }]
+    },
+    {
+      "name": "Filter by severity",
+      "request": { "method": "GET", "url": "{{baseUrl}}/bugs?severity=high" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('only high bugs', () => pm.response.json().forEach(b => pm.expect(b.severity).to.eql('high')));"
+      ] } }]
+    },
+    {
+      "name": "Resolve bug",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/bugs/{{bugId}}",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"status\":\"resolved\"}" }
+      },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 200', () => pm.response.to.have.status(200));",
+        "pm.test('is resolved', () => pm.expect(pm.response.json().status).to.eql('resolved'));"
+      ] } }]
+    },
+    {
+      "name": "Delete bug",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/bugs/{{bugId}}" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 204', () => pm.response.to.have.status(204));"
+      ] } }]
+    },
+    {
+      "name": "Deleted bug is gone",
+      "request": { "method": "GET", "url": "{{baseUrl}}/bugs/{{bugId}}" },
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('status 404', () => pm.response.to.have.status(404));"
+      ] } }]
+    }
+  ]
+}

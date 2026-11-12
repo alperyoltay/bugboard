@@ -1,0 +1,67 @@
+:root {
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --text: #1c1f24;
+  --muted: #667085;
+  --border: #e3e6eb;
+  --accent: #3b5bdb;
+  --low: #2f9e44;
+  --medium: #e8a10c;
+  --high: #e8590c;
+  --critical: #c92a2a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111317;
+    --card: #1a1d23;
+    --text: #e6e8eb;
+    --muted: #98a2b3;
+    --border: #2b3038;
+  }
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+a { color: inherit; }
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 24px; background: var(--card); border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; font-size: 1.15rem; text-decoration: none; }
+.container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+
+.button, button {
+  background: var(--accent); color: #fff; border: 0; border-radius: 8px;
+  padding: 8px 14px; font: inherit; cursor: pointer; text-decoration: none;
+}
+.button.danger, button.danger { background: var(--critical); }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat, .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.stat strong { display: block; font-size: 1.6rem; }
+.stat span { color: var(--muted); font-size: 0.85rem; text-transform: capitalize; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+input, select, textarea {
+  font: inherit; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+}
+textarea { min-height: 110px; width: 100%; }
+
+.list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.list a { display: flex; justify-content: space-between; gap: 12px; text-decoration: none; }
+.meta { color: var(--muted); font-size: 0.85rem; }
+
+.badge { border-radius: 999px; padding: 2px 10px; font-size: 0.8rem; color: #fff; text-transform: capitalize; white-space: nowrap; }
+.badge.low { background: var(--low); }
+.badge.medium { background: var(--medium); }
+.badge.high { background: var(--high); }
+.badge.critical { background: var(--critical); }
+
+form.stack { display: grid; gap: 12px; }
+form.stack label { display: grid; gap: 4px; font-weight: 600; }
+pre { white-space: pre-wrap; font-family: inherit; margin: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.error { border-color: var(--critical); color: var(--critical); }
